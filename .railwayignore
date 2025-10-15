@@ -73,5 +73,10 @@ Dockerfile.worker
 docker-compose.yml
 init-db.sql
 
+# Development files
+.env.local
+.env.development.local
+.env.test.local
+
 # Development scripts
 scripts/
