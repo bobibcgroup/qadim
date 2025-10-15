@@ -68,10 +68,7 @@ ehthumbs.db
 Thumbs.db
 
 # Docker files (Railway handles deployment)
-Dockerfile
-Dockerfile.worker
-docker-compose.yml
-init-db.sql
+# Removed Dockerfile and related files to force Node.js buildpack
 
 # Development files
 .env.local
