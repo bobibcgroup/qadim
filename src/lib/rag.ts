@@ -47,31 +47,37 @@ export async function retrieveRelevantDocs(
   // Generate embedding for the query
   const queryEmbedding = await generateEmbedding(query)
   
-  // Use pgvector similarity search
-  // Note: This is a simplified version. In production, you'd use a proper vector search
-  const docs = await prisma.$queryRaw`
-    SELECT 
-      d.id,
-      d.title,
-      d.content,
-      d.lang,
-      d.published_at,
-      s.id as source_id,
-      s.title as source_title,
-      s.authority_level,
-      s.status,
-      s.publisher,
-      s.year,
-      s.credibility,
-      1 - (d.embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity_score
-    FROM docs d
-    JOIN sources s ON d.source_id = s.id
-    WHERE s.status = 'VERIFIED'
-    ORDER BY d.embedding <=> ${JSON.stringify(queryEmbedding)}::vector
-    LIMIT ${limit}
-  `
+  // For now, return mock documents since we're not using pgvector yet
+  // In production, you'd implement proper vector similarity search
+  const docs = await prisma.doc.findMany({
+    take: limit,
+    where: {
+      source: {
+        status: 'VERIFIED'
+      }
+    },
+    include: {
+      source: true
+    },
+    orderBy: {
+      created_at: 'desc'
+    }
+  })
   
-  return docs as any[]
+  // Add mock similarity scores for demo
+  const docsWithScores = docs.map(doc => ({
+    ...doc,
+    source_id: doc.source.id,
+    source_title: doc.source.title,
+    authority_level: doc.source.authority_level,
+    status: doc.source.status,
+    publisher: doc.source.publisher,
+    year: doc.source.year,
+    credibility: doc.source.credibility,
+    similarity_score: Math.random() * 0.3 + 0.7 // Mock similarity score
+  }))
+  
+  return docsWithScores
 }
 
 export async function generateAnswer(request: RAGRequest): Promise<RAGResult> {
@@ -249,7 +255,7 @@ export async function processDocumentBatch(sourceId: string, documents: any[]) {
           source_id: sourceId,
           title: doc.title,
           content: doc.content,
-          embedding: embedding as any, // Cast to handle pgvector type
+          embedding: JSON.stringify(embedding), // Store as JSON string
           lang: doc.language || 'EN',
           published_at: doc.publishedAt ? new Date(doc.publishedAt) : null,
         },

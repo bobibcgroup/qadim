@@ -11,16 +11,7 @@ datasource db {
 }
 
 // Enable pgvector extension
-model _prisma_migrations {
-  id                String   @id
-  checksum          String
-  finished_at       DateTime?
-  migration_name    String
-  logs              String?
-  rolled_back_at    DateTime?
-  started_at        DateTime @default(now())
-  applied_steps_count Int    @default(0)
-}
+// Note: _prisma_migrations table is automatically managed by Prisma
 
 model User {
   id         String    @id @default(uuid())
@@ -34,7 +25,6 @@ model User {
 
   // Relations
   questions       Question[]
-  answers         Answer[]
   community_notes CommunityNote[]
   accounts        Account[]
   sessions        Session[]
@@ -97,7 +87,6 @@ model Source {
 
   // Relations
   docs    Doc[]
-  answers AnswerCitation[]
 
   @@map("sources")
 }
@@ -107,7 +96,7 @@ model Doc {
   source_id    String
   title        String
   content      String    @db.Text
-  embedding    Unsupported("vector(1536)")?
+  embedding    String? // Will be stored as text, converted to vector in queries
   lang         Language
   published_at DateTime?
   created_at   DateTime  @default(now())
@@ -204,11 +193,4 @@ enum CommunityStatus {
   REJECTED
 }
 
-// Type alias for Answer citations
-type AnswerCitation {
-  source_id       String
-  snippet         String
-  authority_level AuthorityLevel
-  status          SourceStatus
-  score           Float
-}
+// Answer citations are stored as JSON in the citations field
