@@ -69,6 +69,7 @@ Thumbs.db
 
 # Docker files (Railway handles deployment)
 # Removed Dockerfile and related files to force Node.js buildpack
+# Removed nixpacks.toml to let Railway auto-detect
 
 # Development files
 .env.local
